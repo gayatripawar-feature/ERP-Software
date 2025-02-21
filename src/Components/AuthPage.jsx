@@ -90,7 +90,7 @@ const RegistrationPage = () => {
             // const response = await axios.post('http://localhost:5000/api/login', loginData);
             // const response = await axios.post('http://localhost:5000/user/login', loginData);
             const response = await axios.post('http://localhost:5000/login', loginData);
-
+            localStorage.setItem('authToken', response.data.token);
             alert(response.data.message || 'Login successful!');
             navigate('/dashboard');
             // Redirect or perform other actions after login success

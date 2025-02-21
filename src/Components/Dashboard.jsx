@@ -93,7 +93,7 @@ const Dashboard = () => {
     //     }
     // };
     
-    // Second approach :
+   
     const handleSubmit = async (e) => {
       e.preventDefault();
   
@@ -101,20 +101,20 @@ const Dashboard = () => {
       const selectedDate = new Date(date);
       const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   
-      // Map days of the week to their respective abbreviations
+      
       const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
       let assignedDays = "";
   
-      // If repeat is Daily, assign all days (Mon-Sat)
+   
       if (taskDetails.repeat === "Daily") {
           assignedDays = "Mon,Tue,Wed,Thu,Fri,Sat";
       } 
-      // If Weekly, assign the selected day only
+      
       else if (taskDetails.repeat === "Weekly") {
-          assignedDays = daysOfWeek[dayOfWeek]; // Assign the day of the week (e.g., 'Mon', 'Tue', etc.)
+          assignedDays = daysOfWeek[dayOfWeek]; 
       } 
-      // For Monthly, Yearly, etc., handle as needed
+     
       else {
           assignedDays = "Custom"; 
       }

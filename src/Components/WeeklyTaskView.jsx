@@ -3,67 +3,118 @@
 
 
 
-import { useState, useEffect } from "react";
-import axios from "axios";
 
-const WeeklyTaskView = ({ startDate, endDate }) => {
-    const [weeklyTasks, setWeeklyTasks] = useState({});
-    const [loading, setLoading] = useState(true);
+import React, { useEffect, useState } from 'react';  
+import axios from 'axios';
 
-    useEffect(() => {
-        axios.get(`/api/getWeeklyTasks?startDate=${startDate}&endDate=${endDate}`)
-            .then(res => {
-                console.log("API Response:", res.data); // Log the API response for debugging
-                if (res.data) {
-                    setWeeklyTasks(res.data);
-                } else {
-                    console.error("No tasks found for the given date range.");
-                    setWeeklyTasks({});
-                }
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Error fetching tasks:", err);
-                setLoading(false);
-            });
-    }, [startDate, endDate]);
+const WeeklyTaskView = () => {
+  const [tasks, setTasks] = useState([]);
+  const [error, setError] = useState(null);
 
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  
+  useEffect(() => {
+    const token = localStorage.getItem("authToken"); 
+    console.log("Stored Token:", token);
 
-    if (loading) {
-        return <div>Loading tasks...</div>;
+    if (token) {
+        try {
+            const decoded = JSON.parse(atob(token.split(".")[1]));
+            console.log("Decoded Token Data:", decoded);
+            console.log("Extracted user_id:", decoded.user_id);
+            // Check if user_id exists
+            if (!decoded.user_id) {
+                console.error("user_id is missing in the token!");
+            }
+        } catch (error) {
+            console.error("Error decoding token:", error);
+        }
+    } else {
+        console.error("No token found in localStorage.");
     }
+  }, []);  
 
-    return (
-        <table border="1">
-            <thead className="text-black">
-                <tr>
-                    <th className="text-black">Time</th>
-                    {days.map(day => <th key={day}>{day}</th>)}
-                </tr>
-            </thead>
-            <tbody>
-                {Object.entries(weeklyTasks).length > 0 ? (
-                    Object.entries(weeklyTasks).map(([time, tasks]) => (
-                        <tr key={time}>
-                            <td className="text-black">{time}</td>
-                            {days.map(day => (
-                                <td key={day} className="text-black">
-                                    {tasks?.[day] || "-"}
-                                </td>
-                            ))}
-                        </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={7} className="text-black">
-                            No tasks available for the selected date range.
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
-    );
+ 
+  const fetchTasks = async () => {
+    try {
+        const token = localStorage.getItem("authToken");  
+        console.log("Token from localStorage:", token); 
+        
+        if (!token) {
+            console.error("No token found, user is not logged in");
+            return;
+        }
+
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));  // Decode JWT
+        console.log("Token decoded:", decodedToken);
+        
+        const userId = decodedToken.user_id;  
+        console.log("Extracted user ID:", userId);
+
+        if (!userId) {
+            console.error("User ID is undefined in token");
+            return;
+        }
+
+        
+    const response = await axios.get(`http://localhost:5000/api/getWeeklyTasks/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+        console.log("Fetched Tasks:", response.data);
+        setTasks(response.data);  
+
+    } catch (error) {
+        console.error("Error fetching tasks:", error);
+        setError("Failed to fetch tasks. Please try again.");
+    }
+  };
+
+  // useEffect hook to fetch tasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, []);  // This effect will run once when the component mounts
+
+  return (
+    <div className='text-black'>
+      <h1 className='text-black'>Weekly Report</h1>
+      {error && <p className='text-red-500'>{error}</p>}  {/* Display error if any */}
+
+      <table className='table table-bordered'>
+        <thead>
+          <tr className='text-black'>
+            <th className='text-black'>Time</th>
+            <th className='text-black'>Monday</th>
+            <th className='text-black'>Tuesday</th>
+            <th className='text-black'>Wednesday</th>
+            <th className='text-black'>Thursday</th>
+            <th className='text-black'>Friday</th>
+            <th className='text-black'>Saturday</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <tr key={task.id}>
+                <td>{task.time}</td>
+                <td>{task.monday || '-'}</td>
+                <td>{task.tuesday || '-'}</td>
+                <td>{task.wednesday || '-'}</td>
+                <td>{task.thursday || '-'}</td>
+                <td>{task.friday || '-'}</td>
+                <td>{task.saturday || '-'}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="7" className="text-center">No tasks available</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 export default WeeklyTaskView;
+

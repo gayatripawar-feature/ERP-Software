@@ -125,35 +125,35 @@ router.post("/saveWeeklyTasks", async (req, res) => {
 
 
 
-// Define the /getWeeklyTasks API route
-router.get("/getWeeklyTasks", async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;  
-        const query = `
-            SELECT time_slot, assigned_days, task_details 
-            FROM tasks 
-            WHERE start_date BETWEEN ? AND ?
-            ORDER BY time_slot ASC
-        `;
-        const [tasks] = await db.query(query, [startDate, endDate]);
+// // Define the /getWeeklyTasks API route
+// router.get("/getWeeklyTasks", async (req, res) => {
+//     try {
+//         const { startDate, endDate } = req.query;  
+//         const query = `
+//             SELECT time_slot, assigned_days, task_details 
+//             FROM tasks 
+//             WHERE start_date BETWEEN ? AND ?
+//             ORDER BY time_slot ASC
+//         `;
+//         const [tasks] = await db.query(query, [startDate, endDate]);
 
-        // Transform data into Weekly Format
-        let weeklyData = {};
-        tasks.forEach(({ time_slot, assigned_days, task_details }) => {
-            if (!weeklyData[time_slot]) {
-                weeklyData[time_slot] = { Mon: "-", Tue: "-", Wed: "-", Thu: "-", Fri: "-", Sat: "-" };
-            }
-            assigned_days.split(",").forEach(day => {
-                weeklyData[time_slot][day] = task_details;
-            });
-        });
+//         // Transform data into Weekly Format
+//         let weeklyData = {};
+//         tasks.forEach(({ time_slot, assigned_days, task_details }) => {
+//             if (!weeklyData[time_slot]) {
+//                 weeklyData[time_slot] = { Mon: "-", Tue: "-", Wed: "-", Thu: "-", Fri: "-", Sat: "-" };
+//             }
+//             assigned_days.split(",").forEach(day => {
+//                 weeklyData[time_slot][day] = task_details;
+//             });
+//         });
 
-        res.json(weeklyData);
-    } catch (error) {
-        console.error("Error fetching weekly tasks:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
+//         res.json(weeklyData);
+//     } catch (error) {
+//         console.error("Error fetching weekly tasks:", error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// });
 
 module.exports = router;
 
