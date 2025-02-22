@@ -2,8 +2,13 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db"); 
-
-// Route to save weekly tasks
+const app = express();
+const cors = require('cors');
+const bodyParser = require('body-parser');
+require('dotenv').config();
+const mysql = require('mysql2');
+router.use(bodyParser.json());
+app.use(cors());
 router.post("/saveWeeklyTasks", async (req, res) => {
     try {
         const { date, taskDetails, tasks, assignedDays } = req.body;
@@ -58,102 +63,120 @@ router.post("/saveWeeklyTasks", async (req, res) => {
 });
 
 
-// ✅ Route to Get Weekly Tasks
-// router.get("/getWeeklyTasks", async (req, res) => {
-//     try {
-//         const query = `
-//             SELECT 
-//                 time_slot,
-//                 MAX(CASE WHEN assigned_days LIKE '%Mon%' THEN task_details END) AS Monday,
-//                 MAX(CASE WHEN assigned_days LIKE '%Tue%' THEN task_details END) AS Tuesday,
-//                 MAX(CASE WHEN assigned_days LIKE '%Wed%' THEN task_details END) AS Wednesday,
-//                 MAX(CASE WHEN assigned_days LIKE '%Thu%' THEN task_details END) AS Thursday,
-//                 MAX(CASE WHEN assigned_days LIKE '%Fri%' THEN task_details END) AS Friday,
-//                 MAX(CASE WHEN assigned_days LIKE '%Sat%' THEN task_details END) AS Saturday
-//             FROM tasks
-//             WHERE start_date <= CURDATE() 
-//             AND (end_date IS NULL OR end_date >= CURDATE())
-//             GROUP BY time_slot;
-//         `;
 
-//         const [rows] = await db.execute(query);
 
-//         res.json(rows);
-//     } catch (error) {
-//         console.error("❌ Error fetching weekly tasks:", error);
-//         res.status(500).json({ error: "Internal server error" });
+
+
+
+  
+// router.get('/api/getWeeklyTasks/:user_id', (req, res) => {
+//     const { user_id } = req.params;
+
+//     if (!user_id) {
+//       return res.status(400).json({ message: 'User ID is required' });
 //     }
+//     console.log('User ID:', user_id);
+
+//     db.query(
+//       'SELECT time_slot, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Mon", assigned_days) THEN task_details ELSE "-" END) AS Monday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Tue", assigned_days) THEN task_details ELSE "-" END) AS Tuesday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Wed", assigned_days) THEN task_details ELSE "-" END) AS Wednesday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Thu", assigned_days) THEN task_details ELSE "-" END) AS Thursday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Fri", assigned_days) THEN task_details ELSE "-" END) AS Friday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Sat", assigned_days) THEN task_details ELSE "-" END) AS Saturday ' +
+//       'FROM tasks WHERE user_id = ? GROUP BY time_slot ORDER BY time_slot;',
+//       [user_id],
+//       (err, results) => {
+//         if (err) {
+//           console.error("Error fetching tasks from MySQL:", err);
+//           return res.status(500).json({ message: 'Failed to fetch tasks from MySQL' });
+//         }
+
+//         if (results.length === 0) {
+//           console.log(`No tasks found for user_id: ${user_id}`);
+//           return res.status(404).json({ message: 'No tasks found for this user' });
+//         }
+
+//         console.log('Tasks for user:', results); 
+//         res.json(results); 
+//       }
+//     );
 // });
 
-// router.get("/getWeeklyTasks", async (req, res) => {
-//     try {
-//         const query = `
-//             SELECT time_slot,
-//                    MAX(CASE WHEN assigned_days LIKE '%Mon%' THEN task_details END) AS Monday,
-//                    MAX(CASE WHEN assigned_days LIKE '%Tue%' THEN task_details END) AS Tuesday,
-//                    MAX(CASE WHEN assigned_days LIKE '%Wed%' THEN task_details END) AS Wednesday,
-//                    MAX(CASE WHEN assigned_days LIKE '%Thu%' THEN task_details END) AS Thursday,
-//                    MAX(CASE WHEN assigned_days LIKE '%Fri%' THEN task_details END) AS Friday,
-//                    MAX(CASE WHEN assigned_days LIKE '%Sat%' THEN task_details END) AS Saturday
-//             FROM tasks
-//             WHERE start_date <= CURDATE()
-//             AND (end_date IS NULL OR end_date >= CURDATE())
-//             GROUP BY time_slot;
-//         `;
+router.get('/api/getWeeklyTasks/:user_id', (req, res) => {
+    const { user_id } = req.params;
 
-//         const [rows] = await db.execute(query);
+    if (!user_id) {
+        return res.status(400).json({ message: 'User ID is required' });
+    }
 
-//         // Formatting the output
-//         const formattedTasks = rows.map(row => ({
-//             time_slot: row.time_slot,
-//             Monday: row.Monday || "-",
-//             Tuesday: row.Tuesday || "-",
-//             Wednesday: row.Wednesday || "-",
-//             Thursday: row.Thursday || "-",
-//             Friday: row.Friday || "-",
-//             Saturday: row.Saturday || "-",
-//         }));
+    console.log('Fetching tasks for user_id:', user_id);
 
-//         res.json(formattedTasks);
-//     } catch (error) {
-//         console.error("Error fetching weekly tasks:", error);
-//         res.status(500).json({ error: "Internal server error" });
+    db.query(
+        'SELECT time_slot, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Mon", assigned_days) THEN task_details ELSE "-" END) AS Monday, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Tue", assigned_days) THEN task_details ELSE "-" END) AS Tuesday, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Wed", assigned_days) THEN task_details ELSE "-" END) AS Wednesday, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Thu", assigned_days) THEN task_details ELSE "-" END) AS Thursday, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Fri", assigned_days) THEN task_details ELSE "-" END) AS Friday, ' +
+        'MAX(CASE WHEN FIND_IN_SET("Sat", assigned_days) THEN task_details ELSE "-" END) AS Saturday ' +
+        'FROM tasks WHERE user_id = ? GROUP BY time_slot ORDER BY time_slot;',
+        [user_id],
+        (err, results) => {
+            if (err) {
+                console.error("Error fetching tasks from MySQL:", err);
+                return res.status(500).json({ message: 'Failed to fetch tasks from MySQL' });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: 'No tasks found for this user' });
+            }
+
+            res.json(results); // Return the tasks to the frontend
+        }
+    );
+});
+
+
+// router.get('/api/getWeeklyTasks/:user_id', (req, res) => {  // This is the current route
+
+// Modify the route to use 'username' or 'email' instead of 'user_id'
+// router.get('/api/getWeeklyTasks/:email', (req, res) => {
+//     const { username } = req.params;  // Use username from the request params
+  
+//     if (!email) {
+//       return res.status(400).json({ message: 'email is required' });
 //     }
+  
+//     // Modify the SQL query to search by 'username' instead of 'user_id'
+//     db.query(
+//       'SELECT time_slot, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Mon", assigned_days) THEN task_details ELSE "-" END) AS Monday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Tue", assigned_days) THEN task_details ELSE "-" END) AS Tuesday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Wed", assigned_days) THEN task_details ELSE "-" END) AS Wednesday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Thu", assigned_days) THEN task_details ELSE "-" END) AS Thursday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Fri", assigned_days) THEN task_details ELSE "-" END) AS Friday, ' +
+//       'MAX(CASE WHEN FIND_IN_SET("Sat", assigned_days) THEN task_details ELSE "-" END) AS Saturday ' +
+//       'FROM tasks WHERE username = ? GROUP BY time_slot ORDER BY time_slot;',  // Use username for query
+//       [username],
+//       (err, results) => {
+//         if (err) {
+//           console.error("Error fetching tasks from MySQL:", err);
+//           return res.status(500).json({ message: 'Failed to fetch tasks from MySQL' });
+//         }
+  
+//         if (results.length === 0) {
+//           console.log(`No tasks found for username: ${username}`);
+//           return res.status(404).json({ message: 'No tasks found for this user' });
+//         }
+  
+//         console.log(results); 
+//         res.json(results); 
+//       }
+//     );
 // });
 
-
-
-
-
-// // Define the /getWeeklyTasks API route
-// router.get("/getWeeklyTasks", async (req, res) => {
-//     try {
-//         const { startDate, endDate } = req.query;  
-//         const query = `
-//             SELECT time_slot, assigned_days, task_details 
-//             FROM tasks 
-//             WHERE start_date BETWEEN ? AND ?
-//             ORDER BY time_slot ASC
-//         `;
-//         const [tasks] = await db.query(query, [startDate, endDate]);
-
-//         // Transform data into Weekly Format
-//         let weeklyData = {};
-//         tasks.forEach(({ time_slot, assigned_days, task_details }) => {
-//             if (!weeklyData[time_slot]) {
-//                 weeklyData[time_slot] = { Mon: "-", Tue: "-", Wed: "-", Thu: "-", Fri: "-", Sat: "-" };
-//             }
-//             assigned_days.split(",").forEach(day => {
-//                 weeklyData[time_slot][day] = task_details;
-//             });
-//         });
-
-//         res.json(weeklyData);
-//     } catch (error) {
-//         console.error("Error fetching weekly tasks:", error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
 
 module.exports = router;
 

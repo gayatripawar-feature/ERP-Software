@@ -4,110 +4,157 @@
 
 
 
-import React, { useEffect, useState } from 'react';  
-import axios from 'axios';
+
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+
+// const WeeklyTaskView = () => {
+//   const [tasks, setTasks] = useState([]);
+//   const [error, setError] = useState(null);
+
+//   useEffect(() => {
+//     fetchTasks();
+//   }, []);
+
+//   const fetchTasks = async () => {
+//     try {
+//       const token = localStorage.getItem("authToken");
+//       if (!token) {
+//         console.error("No token found, user is not logged in");
+//         setError("User not authenticated.");
+//         return;
+//       }
+
+//       const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+//       const userId = decodedToken.user_id;
+
+//       const response = await axios.get(`http://localhost:5000/api/getWeeklyTasks/${userId}`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+
+//       setTasks(response.data);
+//     } catch (error) {
+//       console.error("Error fetching tasks:", error);
+//       setError("Failed to fetch tasks. Please try again.");
+//     }
+//   };
+
+
+
+  
+//   return (
+//     <div className="p-6 text-black">
+//       <h1 className="text-2xl font-bold mb-4">Weekly Report</h1>
+//       {error && <p className="text-red-500">{error}</p>}
+
+//       <table className="table-auto border-collapse border border-gray-400 w-full text-black">
+//         <thead>
+//           <tr className="bg-gray-200 text-black">
+//             <th className="border p-2">Time</th>
+//             <th className="border p-2">Monday</th>
+//             <th className="border p-2">Tuesday</th>
+//             <th className="border p-2">Wednesday</th>
+//             <th className="border p-2">Thursday</th>
+//             <th className="border p-2">Friday</th>
+//             <th className="border p-2">Saturday</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {tasks.length > 0 ? (
+//             tasks.map((task, index) => (
+//               <tr key={index} className="border">
+//                 <td className="border p-2">{task.time_slot}</td>
+//                 <td className="border p-2">{task.Monday || '-'}</td>
+//                 <td className="border p-2">{task.Tuesday || '-'}</td>
+//                 <td className="border p-2">{task.Wednesday || '-'}</td>
+//                 <td className="border p-2">{task.Thursday || '-'}</td>
+//                 <td className="border p-2">{task.Friday || '-'}</td>
+//                 <td className="border p-2">{task.Saturday || '-'}</td>
+//               </tr>
+//             ))
+//           ) : (
+//             <tr>
+//               <td colSpan="7" className="border p-2 text-center">No tasks available</td>
+//             </tr>
+//           )}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// };
+
+// export default WeeklyTaskView;
+
+
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const WeeklyTaskView = () => {
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState(null);
 
-  
   useEffect(() => {
-    const token = localStorage.getItem("authToken"); 
-    console.log("Stored Token:", token);
+    fetchTasks();
+  }, []);
 
-    if (token) {
-        try {
-            const decoded = JSON.parse(atob(token.split(".")[1]));
-            console.log("Decoded Token Data:", decoded);
-            console.log("Extracted user_id:", decoded.user_id);
-            // Check if user_id exists
-            if (!decoded.user_id) {
-                console.error("user_id is missing in the token!");
-            }
-        } catch (error) {
-            console.error("Error decoding token:", error);
-        }
-    } else {
-        console.error("No token found in localStorage.");
-    }
-  }, []);  
-
- 
   const fetchTasks = async () => {
     try {
-        const token = localStorage.getItem("authToken");  
-        console.log("Token from localStorage:", token); 
-        
-        if (!token) {
-            console.error("No token found, user is not logged in");
-            return;
-        }
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found, user is not logged in");
+        setError("User not authenticated.");
+        return;
+      }
 
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));  // Decode JWT
-        console.log("Token decoded:", decodedToken);
-        
-        const userId = decodedToken.user_id;  
-        console.log("Extracted user ID:", userId);
+      const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+      const userId = decodedToken.user_id;
 
-        if (!userId) {
-            console.error("User ID is undefined in token");
-            return;
-        }
+      console.log("User ID:", userId);  // Log userId to verify
 
-        
-    const response = await axios.get(`http://localhost:5000/api/getWeeklyTasks/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.get(`http://localhost:5000/api/getWeeklyTasks/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-        console.log("Fetched Tasks:", response.data);
-        setTasks(response.data);  
 
+      setTasks(response.data);
     } catch (error) {
-        console.error("Error fetching tasks:", error);
-        setError("Failed to fetch tasks. Please try again.");
+      console.error("Error fetching tasks:", error);
+      setError("Failed to fetch tasks. Please try again.");
     }
   };
 
-  // useEffect hook to fetch tasks on component mount
-  useEffect(() => {
-    fetchTasks();
-  }, []);  // This effect will run once when the component mounts
-
   return (
-    <div className='text-black'>
-      <h1 className='text-black'>Weekly Report</h1>
-      {error && <p className='text-red-500'>{error}</p>}  {/* Display error if any */}
+    <div className="p-6 text-black">
+      <h1 className="text-2xl font-bold mb-4">Weekly Report</h1>
+      {error && <p className="text-red-500">{error}</p>}
 
-      <table className='table table-bordered'>
+      <table className="table-auto border-collapse border border-gray-400 w-full text-black">
         <thead>
-          <tr className='text-black'>
-            <th className='text-black'>Time</th>
-            <th className='text-black'>Monday</th>
-            <th className='text-black'>Tuesday</th>
-            <th className='text-black'>Wednesday</th>
-            <th className='text-black'>Thursday</th>
-            <th className='text-black'>Friday</th>
-            <th className='text-black'>Saturday</th>
+          <tr className="bg-gray-200 text-black">
+            <th className="border p-2">Time</th>
+            <th className="border p-2">Monday</th>
+            <th className="border p-2">Tuesday</th>
+            <th className="border p-2">Wednesday</th>
+            <th className="border p-2">Thursday</th>
+            <th className="border p-2">Friday</th>
+            <th className="border p-2">Saturday</th>
           </tr>
         </thead>
         <tbody>
           {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <tr key={task.id}>
-                <td>{task.time}</td>
-                <td>{task.monday || '-'}</td>
-                <td>{task.tuesday || '-'}</td>
-                <td>{task.wednesday || '-'}</td>
-                <td>{task.thursday || '-'}</td>
-                <td>{task.friday || '-'}</td>
-                <td>{task.saturday || '-'}</td>
+            tasks.map((task, index) => (
+              <tr key={index} className="border">
+                <td className="border p-2">{task.time_slot}</td>
+                <td className="border p-2">{task.Monday || '-'}</td>
+                <td className="border p-2">{task.Tuesday || '-'}</td>
+                <td className="border p-2">{task.Wednesday || '-'}</td>
+                <td className="border p-2">{task.Thursday || '-'}</td>
+                <td className="border p-2">{task.Friday || '-'}</td>
+                <td className="border p-2">{task.Saturday || '-'}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center">No tasks available</td>
+              <td colSpan="7" className="border p-2 text-center">No tasks available</td>
             </tr>
           )}
         </tbody>
@@ -117,4 +164,3 @@ const WeeklyTaskView = () => {
 };
 
 export default WeeklyTaskView;
-
