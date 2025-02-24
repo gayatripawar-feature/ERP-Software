@@ -134,7 +134,8 @@ router.post('/save-tasks', (req, res) => {
 
 
 
-app.get('/api/getWeeklyTasks/:user_id', (req, res) => {
+// router.get('/api/getWeeklyTasks/:user_id', (req, res) => {
+  router.get('/getWeeklyTasks/:user_id', (req, res) => {
   const { user_id } = req.params;
 
   if (!user_id) {
@@ -159,5 +160,4 @@ module.exports = router;
 
 
 
-// ✅ Export router
-module.exports = router;
+

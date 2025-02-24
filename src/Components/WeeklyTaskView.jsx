@@ -114,7 +114,7 @@ const WeeklyTaskView = () => {
       const response = await axios.get(`http://localhost:5000/api/getWeeklyTasks/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+     debugger;
       setTasks(response.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);
